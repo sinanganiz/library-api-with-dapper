@@ -2,6 +2,7 @@ using FluentValidation;
 using LibraryApi.Data;
 using LibraryApi.Repositories;
 using LibraryApi.Repositories.Implementations;
+using LibraryApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddSingleton<DbContext>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+
+builder.Services.AddScoped<ILoanService, LoanService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? "Data Source=library.db";
