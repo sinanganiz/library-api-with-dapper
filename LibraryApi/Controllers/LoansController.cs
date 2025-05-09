@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentValidation;
 using LibraryApi.DTOs.Loans;
 using LibraryApi.Models;
 using LibraryApi.Repositories;
@@ -12,11 +13,16 @@ namespace LibraryApi.Controllers
     {
         private readonly ILoanRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IValidator<CreateLoanDto> _createLoanValidator;
+        private readonly IValidator<UpdateLoanDto> _updateLoanValidator;
 
-        public LoansController(ILoanRepository repository, IMapper mapper)
+
+        public LoansController(ILoanRepository repository, IMapper mapper, IValidator<CreateLoanDto> createLoanValidator, IValidator<UpdateLoanDto> updateLoanValidator)
         {
             _repository = repository;
             _mapper = mapper;
+            _createLoanValidator = createLoanValidator;
+            _updateLoanValidator = updateLoanValidator;
         }
 
         [HttpGet]
@@ -39,6 +45,12 @@ namespace LibraryApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateLoanDto dto)
         {
+            var result = await _createLoanValidator.ValidateAsync(dto);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
+            }
+
             var loan = _mapper.Map<Loan>(dto);
             var id = await _repository.CreateAsync(loan);
 
@@ -48,6 +60,12 @@ namespace LibraryApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UpdateLoanDto dto)
         {
+            var result = await _updateLoanValidator.ValidateAsync(dto);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
+            }
+
             var loan = _mapper.Map<Loan>(dto);
             loan.Id = id;
             var updated = await _repository.UpdateAsync(loan);
