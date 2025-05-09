@@ -19,6 +19,11 @@ builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? "Data Source=library.db";
+
+DbInitializer.InitializeDatabase(connectionString);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
